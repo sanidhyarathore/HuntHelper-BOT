@@ -1,0 +1,24 @@
+# --- Telegram user account (reads the channels) ---
+# Get these from https://my.telegram.org -> API development tools
+TG_API_ID=
+TG_API_HASH=
+
+# --- Triage bot ---
+# From @BotFather: /newbot. Free.
+BOT_TOKEN=
+# Your own numeric id: message @userinfobot
+MY_USER_ID=
+
+# --- Anthropic ---
+ANTHROPIC_API_KEY=
+MODEL_EXTRACT=claude-haiku-4-5-20251001
+MODEL_WRITE=claude-sonnet-5
+
+# --- Channels to watch (comma separated, from `python run.py channels`) ---
+CHANNELS=@somejobschannel,@anotherone
+
+# --- Tuning ---
+NOTIFY_THRESHOLD=60
+BACKFILL_LIMIT=200
+MAX_NOTIFY_PER_RUN=12
+CV_PATH=./assets/cv.pdf

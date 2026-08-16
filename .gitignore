@@ -1,0 +1,7 @@
+.env
+data/
+assets/
+__pycache__/
+*.session
+*.session-journal
+jobs.csv

@@ -1,0 +1,11 @@
+telethon>=1.36
+anthropic>=0.40
+python-dotenv>=1.0
+PyYAML>=6.0
+
+# Gmail drafts (optional but recommended)
+google-api-python-client>=2.140
+google-auth-oauthlib>=1.2
+
+# Phase 2: local form autofill only
+playwright>=1.45

@@ -1,0 +1,918 @@
+# ============================================================
+# SANIDHYA RATHORE — JOB APPLICATION BOT PROFILE
+# ============================================================
+# Purpose:
+# Drive job discovery, fit scoring, application prioritization,
+# resume tailoring and personalized application notes.
+#
+# Core career objective:
+# Move into a high-value international business / strategy role,
+# maximizing compensation, scope, brand, ownership and long-term
+# career trajectory.
+# ============================================================
+
+
+# ------------------------------------------------------------
+# BASIC PROFILE
+# ------------------------------------------------------------
+
+name: Sanidhya Rathore
+email: "sanidhya.rathore263@gmail.com"
+phone: "+919977008969"
+linkedin: "https://www.linkedin.com/in/sanidhyarathore"
+
+current_title: Senior Manager
+current_company: Urban Company
+years_experience: 3
+
+
+# ------------------------------------------------------------
+# PROFESSIONAL POSITIONING
+# ------------------------------------------------------------
+
+headline: >
+  Business and strategy leader at Urban Company with experience across revenue
+  growth, inside sales, marketplace operations, partner supply, pricing,
+  monetization, analytics and category management. Currently lead a 20+ member
+  internal sales organization across four cities and operate at the intersection
+  of growth, supply, product and commercial strategy. Previously worked at Tata
+  Projects across project engineering and executive-office initiatives.
+  B.Tech Electrical Engineering from IIT Kanpur and former elected Chairperson
+  of the Students' Senate representing 9,300+ students.
+
+professional_identity:
+  - Business Strategy
+  - Business Operations
+  - Revenue Strategy
+  - Commercial Strategy
+  - Growth
+  - Marketplace Operations
+  - Category Management
+  - P&L / Business Ownership
+  - Sales Strategy
+  - Supply Operations
+  - Product Operations
+  - Founder / CEO Office
+
+
+# ------------------------------------------------------------
+# PRIMARY TARGET FUNCTIONS
+# Ordered by importance
+# ------------------------------------------------------------
+
+target_functions:
+
+  # Tier 1 — strongest fit
+  - Strategy & Operations
+  - Business Operations
+  - Revenue Strategy
+  - Commercial Strategy
+  - Growth Strategy
+  - Category Management
+  - Marketplace Operations
+  - Revenue Operations
+  - Sales Strategy
+  - P&L / Business Management
+
+  # Tier 2 — strong adjacent fit
+  - Pricing & Monetization
+  - Supply / Partner Operations
+  - Product Operations
+  - New Business / Market Expansion
+  - Strategic Initiatives
+  - Strategy & Planning
+  - Chief of Staff
+  - CEO Office
+  - COO Office
+  - Founder Office
+
+  # Tier 3 — opportunistic
+  - Corporate Strategy
+  - Business Analyst
+  - Senior Business Analyst
+  - Fintech Strategy
+  - Crypto / Web3 Business Operations
+  - Trading Operations
+  - Commercial Operations
+  - Partnerships Strategy
+
+
+# ------------------------------------------------------------
+# TARGET SENIORITY
+# ------------------------------------------------------------
+
+target_seniority:
+  - Manager
+  - Senior Manager
+  - Lead
+  - Principal
+  - Head
+
+conditional_seniority:
+  - Director
+  - AVP
+
+conditional_seniority_rule: >
+  Director / AVP roles should only qualify when the company is a startup,
+  high-growth technology company, or the role explicitly values 3-6 years
+  of experience and offers unusually broad ownership.
+
+
+# ------------------------------------------------------------
+# TARGET GEOGRAPHIES
+#
+# International relocation is the primary objective.
+# ------------------------------------------------------------
+
+target_locations:
+
+  # Tier 1 — highest preference
+  - Singapore
+  - Dubai
+  - Abu Dhabi
+  - UAE
+
+  # Tier 2 — very strong preference
+  - London
+  - United Kingdom
+  - UK
+  - Amsterdam
+  - Netherlands
+  - Berlin
+  - Germany
+  - Paris
+  - France
+  - Dublin
+  - Ireland
+  - Zurich
+  - Switzerland
+  - Europe
+
+  # Tier 3 — attractive, sponsorship-dependent where applicable
+  - New York
+  - San Francisco
+  - Seattle
+  - Boston
+  - United States
+  - USA
+  - United States of America
+
+  # Tier 3 — attractive international relocation options
+  - Tokyo
+  - Japan
+  - Bangkok
+  - Thailand
+
+  # Tier 4 — selective fallback
+  - Delhi
+  - Gurugram
+  - Gurgaon
+  - Noida
+  - Bangalore
+  - Bengaluru
+  - Mumbai
+  - Hyderabad
+  - India
+
+  # Opportunistic only — NOT priority
+  - Riyadh
+  - Jeddah
+  - Saudi Arabia
+  - Doha
+  - Qatar
+
+  # Flexible
+  - Remote
+
+
+location_priority:
+
+  tier_1:
+    - Singapore
+    - Dubai
+    - Abu Dhabi
+    - UAE
+
+  tier_2:
+    - United Kingdom
+    - UK
+    - London
+    - Netherlands
+    - Amsterdam
+    - Germany
+    - Berlin
+    - France
+    - Paris
+    - Ireland
+    - Dublin
+    - Switzerland
+    - Zurich
+    - Europe
+
+  tier_3:
+    - United States
+    - USA
+    - New York
+    - San Francisco
+    - Seattle
+    - Boston
+    - Japan
+    - Tokyo
+    - Thailand
+    - Bangkok
+
+  tier_4:
+    - Delhi
+    - Gurugram
+    - Gurgaon
+    - Noida
+    - Bangalore
+    - Bengaluru
+    - Mumbai
+    - Hyderabad
+    - India
+
+  opportunistic:
+    - Saudi Arabia
+    - Riyadh
+    - Jeddah
+    - Qatar
+    - Doha
+
+  remote:
+    - Remote
+
+
+location_notes: >
+  International relocation is the primary career objective. Strong preference
+  for Singapore, UAE, Europe, the United States, Japan and Bangkok/Thailand.
+  International roles should generally be prioritized over comparable India
+  roles when the role offers meaningful career progression, compensation,
+  brand value, scope, or international exposure.
+
+  US roles should be considered when the employer supports visa sponsorship or
+  explicitly accepts international candidates. Do not automatically reject
+  US opportunities solely because sponsorship may be required. Instead,
+  downgrade them when sponsorship feasibility is unclear.
+
+  Saudi Arabia is not a priority destination and should receive a lower
+  geographic score. Exceptional Saudi roles with unusually strong
+  compensation, scope, brand or career upside may still be surfaced for
+  manual review.
+
+  India is primarily a fallback market. Apply selectively when the role
+  represents a significant increase in scope, compensation, brand,
+  P&L ownership, international exposure or long-term career value.
+
+  Remote roles should be evaluated based on whether they are genuinely
+  global / location-independent. A remote India-only role should not receive
+  the same geographic score as a global remote role.
+
+
+# ------------------------------------------------------------
+# IDEAL ROLE CHARACTERISTICS
+# ------------------------------------------------------------
+
+ideal_role_signals:
+
+  scope:
+    - Owns a business metric
+    - Owns revenue
+    - Owns P&L
+    - Owns a category
+    - Owns a marketplace
+    - Owns a supply-side problem
+    - Owns a strategic business initiative
+    - Cross-functional ownership
+    - Product + business ownership
+    - Sales + operations ownership
+    - Direct exposure to CEO
+    - Direct exposure to COO
+    - Direct exposure to founder
+    - 0-to-1 mandate
+    - Scale-up mandate
+
+  business_problems:
+    - Revenue growth
+    - Conversion optimization
+    - Pricing
+    - Monetization
+    - Unit economics
+    - Marketplace efficiency
+    - Supply growth
+    - Partner productivity
+    - Customer acquisition
+    - Retention
+    - Market expansion
+    - Operating model design
+    - Process automation
+    - Business transformation
+    - GTM strategy
+    - Commercial strategy
+    - New business development
+
+  company_signals:
+    - High-growth technology company
+    - Marketplace
+    - Two-sided platform
+    - Consumer internet
+    - Fintech
+    - SaaS
+    - Quick commerce
+    - Home services
+    - Travel technology
+    - E-commerce
+    - Payments
+    - Digital financial services
+    - Crypto / Web3
+    - Venture-backed startup
+    - International company
+    - MENA expansion
+    - Asia expansion
+    - Global expansion
+
+
+# ------------------------------------------------------------
+# STRONG MATCH PROFILE
+# ------------------------------------------------------------
+
+strong_match: >
+  A role where Sanidhya owns a meaningful business problem rather than merely
+  executing predefined processes. Strongest matches combine strategy,
+  analytics, revenue / growth, commercial ownership and cross-functional
+  execution, particularly in marketplaces, consumer technology, fintech,
+  high-growth startups or companies expanding internationally.
+
+ideal_role: >
+  The ideal role is an internationally based Manager / Senior Manager / Lead
+  position at a strong technology, consumer, fintech or high-growth company
+  where Sanidhya owns a business metric, category, revenue stream, market,
+  strategic initiative or operating model and works closely with senior
+  leadership.
+
+
+# ------------------------------------------------------------
+# BONUS SIGNALS
+# ------------------------------------------------------------
+
+bonus_signals:
+
+  business_model:
+    - Marketplace
+    - Two-sided platform
+    - Consumer internet
+    - Home services
+    - Quick commerce
+    - E-commerce
+    - Fintech
+    - Payments
+    - SaaS
+    - Crypto
+    - Web3
+
+  role:
+    - P&L ownership
+    - Revenue ownership
+    - Pricing ownership
+    - Monetization
+    - GTM strategy
+    - Market expansion
+    - New business
+    - CEO Office
+    - COO Office
+    - Founder reporting line
+    - Strategy & Operations
+    - International expansion
+    - MENA expansion
+    - Asia expansion
+    - 0-to-1
+    - Turnaround
+    - Transformation
+
+  company:
+    - Strong global brand
+    - High-growth startup
+    - Series A
+    - Series B
+    - Series C
+    - Public technology company
+    - International company entering India
+    - International company expanding into MENA
+    - International company expanding into Asia
+    - Reputable institutional investors
+
+
+# ------------------------------------------------------------
+# ANALYTICAL / DATA SKILLS
+# ------------------------------------------------------------
+
+analytical_skills:
+  - SQL
+  - Excel
+  - Google Sheets
+  - Business analytics
+  - Funnel analytics
+  - Experimentation
+  - A/B testing
+  - Pricing analysis
+  - Monetization analysis
+  - Dashboarding
+  - KPI design
+  - Data-driven decision making
+  - Process automation
+
+technical_bonus:
+  - Solidity
+  - Ethereum
+  - Web3
+  - Smart contracts
+  - Blockchain
+  - Rust
+
+technical_positioning: >
+  Technical fluency should be treated as a supporting advantage for business,
+  strategy, operations, fintech and Web3 roles, not as evidence that the
+  candidate is targeting software engineering positions.
+
+  For Web3 / crypto roles, prioritize business strategy, growth, operations,
+  ecosystem, partnerships, product operations and commercial roles over
+  engineering roles.
+
+
+# ------------------------------------------------------------
+# DOMAIN PRIORITY
+# ------------------------------------------------------------
+
+domain_priority:
+
+  tier_1:
+    - Consumer technology
+    - Marketplace
+    - Home services
+    - E-commerce
+    - Fintech
+    - SaaS
+    - Quick commerce
+
+  tier_2:
+    - Travel technology
+    - Payments
+    - Digital financial services
+    - Logistics
+    - Mobility
+    - Internet platforms
+    - Consumer finance
+
+  tier_3:
+    - Crypto
+    - Web3
+    - Blockchain
+    - Financial markets
+    - Trading
+    - HFT-adjacent business roles
+
+
+domain_rule: >
+  Crypto, Web3 and financial-markets roles should be considered when the role
+  is business, strategy, operations, growth, commercial, product operations,
+  partnerships, trading operations or client-facing rather than requiring
+  deep quantitative research or software-engineering expertise.
+
+
+# ------------------------------------------------------------
+# CAREER UPSIDE SIGNALS
+# ------------------------------------------------------------
+
+career_upside_signals:
+
+  very_high:
+    - Significant P&L ownership
+    - Direct CEO reporting
+    - Direct COO reporting
+    - Direct founder reporting
+    - International responsibility
+    - MENA responsibility
+    - Asia responsibility
+    - Global responsibility
+    - Business unit ownership
+    - Category ownership
+    - Market expansion
+    - Strategy + execution ownership
+    - Strong global technology brand
+
+  high:
+    - Revenue ownership
+    - Pricing / monetization
+    - Marketplace ownership
+    - Cross-functional leadership
+    - Team leadership
+    - Product + business interface
+    - Exposure to senior leadership
+    - International market exposure
+    - High-growth startup environment
+
+  medium:
+    - Pure strategy without execution
+    - Analytics-heavy business roles
+    - PMO / transformation
+    - Generic business operations
+
+  low:
+    - Process management
+    - Reporting-only roles
+    - Administrative operations
+    - Execution without ownership
+    - Narrow functional roles
+
+
+# ------------------------------------------------------------
+# PROOF POINTS
+# Only use claims supported by the candidate's resume.
+# ------------------------------------------------------------
+
+achievements:
+
+  urban_company:
+
+    - >
+      Lead a 20+ member internal sales organization supporting approximately
+      ₹10 crore of monthly revenue across four cities.
+
+    - >
+      Built and operationalized a structured internal sales operating model
+      spanning lead prioritization, CRM workflows, performance management,
+      training, incentives and governance.
+
+    - >
+      Contributed to 83% YoY quarterly revenue growth through improvements
+      across the sales and operating funnel.
+
+    - >
+      Designed a partner success and supply operating model across 500+
+      partners, including tiering, retraining, earning assurance and automated
+      performance interventions.
+
+    - >
+      Increased Silver+ partners from approximately 40% to 85.5%.
+
+    - >
+      Reduced monthly partner churn from approximately 20% to 6%.
+
+    - >
+      Reduced MG burn by approximately 30% through improvements in partner
+      economics and operating efficiency.
+
+    - >
+      Designed and operationalized the partner payout operating system across
+      four cities, processing ₹2+ crore of monthly partner payouts.
+
+    - >
+      Automated approximately 90% of payout operations using dashboards,
+      SQL validations, alerts and configurable workflows.
+
+    - >
+      Reduced payout-related escalations by approximately 95%.
+
+  tata_projects:
+
+    - >
+      Worked across project engineering and executive-office responsibilities
+      at Tata Projects, supporting major EPC projects and cross-functional
+      engineering and supply-chain initiatives.
+
+    - >
+      Supported proposal engineering for three projects with combined value
+      exceeding ₹2,500 crore.
+
+    - >
+      Coordinated resources across five geographies and worked with a
+      50+ member engineering organization.
+
+  leadership:
+
+    - >
+      Elected Chairperson of the Students' Senate at IIT Kanpur, representing
+      9,300+ students.
+
+    - >
+      Managed a student leadership organization involving 40+ senators and
+      approximately ₹3.5+ crore of budget / institutional resources.
+
+
+# ------------------------------------------------------------
+# EXCLUSIONS
+# ------------------------------------------------------------
+
+exclusions:
+
+  experience:
+    - Fresher
+    - Entry-level
+    - 0-2 years experience
+    - Roles materially below current seniority without exceptional upside
+
+  sales:
+    - SDR
+    - BDR
+    - Telecaller
+    - Telesales
+    - Sales Executive
+    - Field Sales Executive
+    - Door-to-door sales
+    - Pure individual-contributor sales
+    - Commission-only sales
+
+  employment:
+    - Commission-only
+    - Unpaid
+    - Internship
+    - Staffing agency listing without named client
+    - Contract role without meaningful strategic scope
+
+  technical:
+    - Software Engineer
+    - SDE
+    - Backend Engineer
+    - Frontend Engineer
+    - Full-stack Engineer
+    - ML Engineer
+    - Data Scientist
+    - Quant Researcher
+    - Quant Developer
+
+  professional_requirements:
+    - CA required
+    - CFA required
+    - Law degree required
+    - Medical degree required
+    - Professional licence not held by candidate
+
+  role_quality:
+    - Pure PMO
+    - Administrative operations
+    - Coordinator
+    - Process executor
+    - Routine reporting
+    - Back-office processing
+    - Customer support
+    - Call-center management without strategic ownership
+
+
+# ------------------------------------------------------------
+# INTERNATIONAL / VISA RULES
+# ------------------------------------------------------------
+
+visa_rules:
+
+  us:
+    priority: high
+    rule: >
+      Do not automatically reject US roles because sponsorship may be required.
+      Prefer companies that explicitly sponsor international candidates or have
+      established H-1B / employment visa processes. If sponsorship is clearly
+      unavailable, downgrade rather than automatically apply.
+
+  europe:
+    priority: high
+    rule: >
+      Prefer employers that sponsor skilled-worker visas or have established
+      international relocation programs. Do not reject solely because
+      sponsorship is not mentioned unless the listing explicitly requires
+      existing work authorization.
+
+  singapore:
+    priority: very_high
+    rule: >
+      Prefer roles where the employer is known or likely to support Employment
+      Pass sponsorship. Treat Singapore as one of the highest-priority
+      international markets.
+
+  uae:
+    priority: very_high
+    rule: >
+      UAE relocation is highly attractive. Employer-sponsored relocation or
+      employment visa should be treated as a strong positive signal.
+
+  japan:
+    priority: high
+    rule: >
+      Consider roles where English is the primary working language or where
+      Japanese proficiency is not mandatory.
+
+  thailand:
+    priority: high
+    rule: >
+      Prioritize Bangkok roles at multinational, technology, fintech,
+      consumer-internet and high-growth companies where English is the primary
+      working language.
+
+  saudi_arabia:
+    priority: low
+    rule: >
+      Saudi Arabia is not a preferred destination. Only surface roles with
+      exceptional compensation, scope, brand, international exposure or career
+      upside for manual review.
+
+
+# ------------------------------------------------------------
+# APPLICATION QUALITY RULES
+# ------------------------------------------------------------
+
+auto_apply_if:
+
+  minimum_match_score: 72
+
+  required:
+    - Role matches at least one Tier-1 target function
+    - Seniority is Manager or above
+    - No hard exclusion criteria triggered
+    - Role has credible business ownership or strategic scope
+
+  strong_apply_if:
+    - Match score >= 82
+    - Singapore / UAE / Europe / US / Japan / Bangkok
+    - P&L ownership
+    - Revenue ownership
+    - Category ownership
+    - CEO / COO / founder exposure
+    - International expansion
+    - Strong technology brand
+    - High-growth startup
+    - Fintech
+    - Marketplace
+    - Consumer internet
+
+  manual_review_if:
+    - Match score between 60 and 71
+    - Director / AVP title with unusually broad scope
+    - Unclear compensation
+    - Ambiguous role seniority
+    - Strong company but imperfect function match
+    - Interesting fintech / Web3 / financial-markets adjacency
+    - US role with unclear sponsorship
+    - Europe role with unclear work authorization
+    - Saudi / Qatar role with unusually strong upside
+
+  auto_reject_if:
+    - Match score < 60
+    - Any hard exclusion triggered
+    - Role is primarily execution without ownership
+    - Role is materially below current career level
+    - Role is primarily telecalling / field sales
+    - Role requires deep software engineering
+    - Role requires quantitative research / quant development
+
+
+# ------------------------------------------------------------
+# FIT SCORING
+# ------------------------------------------------------------
+
+fit_scoring:
+
+  function_match: 25
+  scope_and_ownership: 20
+  seniority: 10
+  company_quality: 10
+  geography: 15
+  industry_match: 8
+  career_upside: 7
+  technical_or_analytical_fit: 5
+
+
+# ------------------------------------------------------------
+# GEOGRAPHIC SCORING GUIDANCE
+# ------------------------------------------------------------
+
+geographic_scoring:
+
+  singapore:
+    score: 15
+
+  uae:
+    score: 15
+
+  europe:
+    score: 14
+
+  united_states:
+    score: 14
+    adjustment:
+      sponsorship_confirmed: +1
+      sponsorship_unclear: -1
+      sponsorship_unavailable: -4
+
+  japan:
+    score: 13
+
+  thailand:
+    score: 13
+
+  remote_global:
+    score: 13
+
+  india:
+    score: 7
+    adjustment:
+      major_scope_increase: +2
+      exceptional_brand: +2
+      international_mandate: +2
+      major_compensation_increase: +2
+
+  saudi_arabia:
+    score: 6
+    adjustment:
+      exceptional_scope: +2
+      exceptional_compensation: +2
+      exceptional_brand: +1
+
+
+# ------------------------------------------------------------
+# APPLICATION PRIORITY
+# ------------------------------------------------------------
+
+priority_rules:
+
+  P1:
+    - Singapore
+    - UAE
+    - Europe
+    - US roles with viable sponsorship
+    - Japan
+    - Bangkok
+    - Strategy / Operations / Revenue / Commercial / Category
+    - Manager / Senior Manager / Lead / Principal
+    - Strong company or high-growth startup
+    - Meaningful ownership
+
+  P2:
+    - Strong international role with slightly weaker function fit
+    - Strong India role with substantial scope increase
+    - International company
+    - Fintech / marketplace / consumer technology
+    - CEO / COO / Founder Office
+    - Strong Web3 / crypto business role
+
+  P3:
+    - Interesting adjacent role
+    - Financial-markets / trading operations role
+    - Strong brand but weaker direct function match
+    - Saudi / Qatar role with exceptional upside
+
+  REJECT:
+    - Generic India role with no meaningful upside
+    - Low-scope operations role
+    - Pure sales execution
+    - Roles materially below current seniority
+    - Deep engineering / quant roles
+
+
+# ------------------------------------------------------------
+# CAREER DECISION RULE
+# ------------------------------------------------------------
+
+career_decision_rule: >
+  Optimize for long-term career trajectory rather than application volume.
+  Prefer roles that increase at least two of the following: geography,
+  compensation, scope, company quality, P&L ownership, strategic exposure,
+  international exposure, leadership responsibility, founder / C-suite
+  proximity, or marketability of future career options.
+
+career_direction: >
+  The long-term objective is to build toward senior business leadership,
+  entrepreneurship, investing or operating roles with significant ownership,
+  decision-making authority and economic upside. Avoid getting trapped in
+  narrow execution-oriented sales or operations roles.
+
+
+# ------------------------------------------------------------
+# TAILORED NOTE GENERATION
+# ------------------------------------------------------------
+
+note_strategy: >
+  Tailored application notes should emphasize the 1-2 experiences most
+  directly relevant to the job description. Do not dump all achievements
+  into every application.
+
+note_rules:
+
+  - Never claim an achievement not present in the profile or resume.
+  - Never exaggerate title or seniority.
+  - Never describe Sanidhya as a software engineer.
+  - Never describe Sanidhya as a quant unless the role genuinely targets
+    business-side quantitative roles.
+  - Keep notes concise and specific to the job.
+  - Prefer quantified achievements.
+  - Mention IIT Kanpur selectively when it strengthens the application.
+  - Avoid generic phrases such as "I am passionate about..."
+  - For strategy roles emphasize business ownership, analytics and
+    cross-functional execution.
+  - For revenue / growth roles emphasize sales, conversion, pricing and
+    funnel optimization.
+  - For marketplace roles emphasize partner supply, marketplace health and
+    operating-model design.
+  - For fintech roles emphasize analytical ability, commercial thinking,
+    experimentation and business operations.
+  - For Web3 roles emphasize technical fluency plus business / strategy
+    capabilities.
+  - For international roles emphasize cross-functional leadership and
+    ability to operate in high-growth environments.
