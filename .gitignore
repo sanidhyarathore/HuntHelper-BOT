@@ -1,7 +1,16 @@
 .env
+.env.*
+!.env.example
+
 data/
 assets/
 __pycache__/
+*.pyc
+
 *.session
 *.session-journal
+
 jobs.csv
+
+.venv/
+venv/
