@@ -81,6 +81,33 @@ def conn():
 def init():
     with conn() as c:
         c.executescript(SCHEMA)
+        # Migration: add columns to databases created by earlier versions.
+        cols = {r[1] for r in c.execute("PRAGMA table_info(messages)").fetchall()}
+        if "content_hash" not in cols:
+            c.execute("ALTER TABLE messages ADD COLUMN content_hash TEXT")
+            c.execute("CREATE INDEX IF NOT EXISTS idx_msg_hash "
+                      "ON messages(content_hash)")
+
+
+def seen_content(content_hash: str, exclude_id: int) -> bool:
+    """True if an identical posting was already analysed under a different id.
+
+    Aggregator channels repost the same text verbatim. Catching that here means
+    we never pay to extract the same job twice.
+    """
+    if not content_hash:
+        return False
+    with conn() as c:
+        r = c.execute(
+            "SELECT 1 FROM messages WHERE content_hash = ? AND id != ? "
+            "AND processed = 1 LIMIT 1", (content_hash, exclude_id)).fetchone()
+        return r is not None
+
+
+def set_content_hash(message_id: int, content_hash: str):
+    with conn() as c:
+        c.execute("UPDATE messages SET content_hash = ? WHERE id = ?",
+                  (content_hash, message_id))
 
 
 def save_message(channel, channel_title, msg_id, posted_at, text, buttons, permalink) -> bool:

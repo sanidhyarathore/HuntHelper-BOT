@@ -13,13 +13,33 @@ log = logging.getLogger("pipeline")
 
 def process(limit=200) -> dict:
     prof = config.profile()
-    counts = {"seen": 0, "not_job": 0, "dupe": 0, "rejected": 0, "kept": 0, "scam": 0}
+    counts = {"seen": 0, "not_job": 0, "repost": 0, "prefiltered": 0,
+              "dupe": 0, "rejected": 0, "kept": 0, "scam": 0, "api_calls_saved": 0}
 
     for msg in db.unprocessed_messages(limit):
         counts["seen"] += 1
         try:
+            text = msg["text"] or ""
+
+            # --- free skip 1: we have already analysed this exact posting ---
+            chash = extract.content_hash(text)
+            if chash:
+                db.set_content_hash(msg["id"], chash)
+                if db.seen_content(chash, msg["id"]):
+                    counts["repost"] += 1
+                    counts["api_calls_saved"] += 1
+                    continue
+
+            # --- free skip 2: a title we would reject after paying to read ---
+            if extract.looks_like_job(text):
+                reason = extract.negative_prefilter(text)
+                if reason:
+                    counts["prefiltered"] += 1
+                    counts["api_calls_saved"] += 1
+                    continue
+
             buttons = json.loads(msg["buttons"] or "[]")
-            data = extract.extract(msg["text"] or "", buttons)
+            data = extract.extract(text, buttons)
             if not data:
                 counts["not_job"] += 1
                 continue

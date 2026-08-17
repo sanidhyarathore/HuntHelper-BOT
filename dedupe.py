@@ -61,10 +61,18 @@ def _norm(s: str) -> str:
 
 
 def dedupe_key(company: str, title: str, location: str, apply_url: str) -> str:
-    cu = canonical_url(apply_url)
-    if cu:
-        basis = f"url::{cu}"
-    else:
+    """Identity of a job posting.
+
+    Company+title is the better signal when we have it: aggregator channels
+    repost the same role behind their own tracking links, so URLs differ even
+    though the job is identical. URL is the fallback for posts with no named
+    employer.
+    """
+    nc, nt = _norm(company), _norm(title)
+    if nc and nt:
         city = _norm(location).split(" ")[0] if location else ""
-        basis = f"fuzzy::{_norm(company)}::{_norm(title)}::{city}"
+        basis = f"fuzzy::{nc}::{nt}::{city}"
+    else:
+        cu = canonical_url(apply_url)
+        basis = f"url::{cu}" if cu else f"fuzzy::{nc}::{nt}::{_norm(location)}"
     return hashlib.sha1(basis.encode()).hexdigest()[:20]

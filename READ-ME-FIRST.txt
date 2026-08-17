@@ -1,0 +1,26 @@
+PATCH 2 — cost reduction. Copy all .py files into your tgjobs folder.
+
+Your .env, profile.yaml and data\jobs.db are NOT in this zip.
+The database upgrades itself automatically on next run.
+
+FIRST, run this (free, instant):
+  .venv\Scripts\python insights.py cache
+
+It tells you whether prompt caching will actually engage. If it says
+TOO SMALL, caching is silently ignored and you pay full price — add
+more detail to profile.yaml until it clears.
+
+WHAT CHANGED
+  Repost skip     Identical postings across channels are now detected
+                  by content fingerprint BEFORE any API call.
+  Negative filter Obvious engineering titles skipped without paying to
+                  read them. Multi-role digests are never dropped.
+  Prompt caching  Your profile moved into a cached system block. After
+                  the first call of a run it bills at roughly 10%.
+
+WHAT I DID NOT BUILD
+  Merging extract+score into one call. It would remove the free,
+  auditable hard-filter step between them, and once caching is on it
+  saves very little. Quality cost was not worth it.
+
+Each run now prints  repost / prefiltered / api_calls_saved  counts.

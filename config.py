@@ -21,10 +21,30 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 BOT_SESSION = str(ROOT / "data" / "bot.session")
 MY_USER_ID = int(os.getenv("MY_USER_ID", "0"))  # your own numeric Telegram id
 
-# ---- Anthropic ----
+# ---- LLM provider ----
+# anthropic (default). Swap to gemini/groq for a free tier if you ever want to;
+# see README. Only LLM_PROVIDER, LLM_API_KEY and the models need to change.
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "anthropic").lower()
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-MODEL_EXTRACT = os.getenv("MODEL_EXTRACT", "claude-haiku-4-5-20251001")  # cheap, high volume
-MODEL_WRITE = os.getenv("MODEL_WRITE", "claude-sonnet-5")               # tailored notes
+LLM_API_KEY = os.getenv("LLM_API_KEY", "") or ANTHROPIC_API_KEY
+
+_DEFAULT_MODELS = {
+    "anthropic":  ("claude-haiku-4-5-20251001", "claude-sonnet-5"),
+    "gemini":     ("gemini-2.5-flash-lite", "gemini-2.5-flash"),
+    "groq":       ("llama-3.3-70b-versatile", "llama-3.3-70b-versatile"),
+    "openai":     ("gpt-4.1-mini", "gpt-4.1"),
+    "openrouter": ("google/gemini-2.5-flash-lite", "google/gemini-2.5-flash"),
+}
+_d = _DEFAULT_MODELS.get(LLM_PROVIDER, _DEFAULT_MODELS["anthropic"])
+MODEL_EXTRACT = os.getenv("MODEL_EXTRACT", "") or _d[0]   # cheap, high volume
+MODEL_WRITE = os.getenv("MODEL_WRITE", "") or _d[1]       # tailored notes
+
+# Seconds between API calls. A paid Anthropic key needs almost no spacing;
+# free tiers elsewhere cap around 15/minute, hence the 4s fallback.
+_default_interval = "0.4" if LLM_PROVIDER == "anthropic" else "4"
+LLM_MIN_INTERVAL = float(os.getenv("LLM_MIN_INTERVAL", _default_interval))
+LLM_MAX_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "5"))
+LLM_BACKOFF_BASE = float(os.getenv("LLM_BACKOFF_BASE", "8"))
 
 # ---- Storage ----
 DB_PATH = str(ROOT / "data" / "jobs.db")
@@ -57,12 +77,24 @@ SCAM_PATTERNS = [
 ]
 
 
+_profile = None
+
+
 def profile() -> dict:
-    with open(ROOT / "profile.yaml") as f:
-        return yaml.safe_load(f)
+    """Loaded once per process so the cached prompt prefix stays identical."""
+    global _profile
+    if _profile is None:
+        with open(ROOT / "profile.yaml", encoding="utf-8") as f:
+            _profile = yaml.safe_load(f)
+    return _profile
 
 
 def require(*names):
     missing = [n for n in names if not globals().get(n)]
     if missing:
         raise SystemExit(f"Missing config: {', '.join(missing)}. Check your .env file.")
+
+# Prompt caching. Haiku 4.5 needs a 4,096-token prefix before caching engages;
+# below that the API silently ignores it. Raise if you switch to a model with a
+# higher floor.
+CACHE_MIN_TOKENS = int(os.getenv("CACHE_MIN_TOKENS", "4096"))
