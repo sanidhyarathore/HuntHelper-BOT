@@ -3,9 +3,9 @@
 Anthropic uses native tool-use. Everything else goes through the OpenAI-compatible
 route, which Gemini, Groq and OpenAI all speak.
 
-Free tiers have tight per-minute limits, so every call goes through a throttle
-and retries on 429 with backoff. On Gemini's free tier a full run of ~180 calls
-takes roughly ten minutes. That's fine — it runs in the background.
+Free tiers have tight limits, so every call goes through a throttle and retries
+on transient rate limits. A DAILY quota hit is different — no amount of backoff
+helps until the quota resets — so that raises immediately instead of retrying.
 """
 import json
 import logging
@@ -18,9 +18,9 @@ import config
 
 log = logging.getLogger("llm")
 
-_client = None
+_clients = {}
 _lock = threading.Lock()
-_last_call = 0.0
+_last_call = {}
 
 BASE_URLS = {
     "gemini": "https://generativelanguage.googleapis.com/v1beta/openai/",
@@ -30,29 +30,53 @@ BASE_URLS = {
 }
 
 
-def _throttle():
-    """Space calls out so we stay under the provider's requests-per-minute cap."""
-    global _last_call
+class LLMCallFailed(Exception):
+    """The call did not succeed after retries. The caller decides what that means —
+    for extraction, it means the message must NOT be marked processed."""
+
+
+class DailyQuotaExceeded(LLMCallFailed):
+    """A per-day cap was hit. Retrying won't help until it resets — callers should
+    stop the current run rather than keep retrying this or later messages."""
+
+
+def _classify_error(msg_lower: str) -> str | None:
+    """'daily', 'minute', or None (not a rate-limit error at all)."""
+    is_rate = ("429" in msg_lower or "resource_exhausted" in msg_lower
+               or "rate limit" in msg_lower or "ratelimiterror" in msg_lower
+               or "quota" in msg_lower)
+    if not is_rate:
+        return None
+    if re.search(r"\bper[\s_-]?day\b|\bdaily\b|\brpd\b", msg_lower):
+        return "daily"
+    return "minute"
+
+
+def _throttle(provider):
+    """Space calls per provider, so a slow free tier doesn't stall a fast one."""
     with _lock:
-        gap = config.LLM_MIN_INTERVAL - (time.monotonic() - _last_call)
+        interval = config.min_interval(provider)
+        gap = interval - (time.monotonic() - _last_call.get(provider, 0.0))
         if gap > 0:
             time.sleep(gap)
-        _last_call = time.monotonic()
+        _last_call[provider] = time.monotonic()
 
 
 def _client_for(provider):
-    global _client
-    if _client is not None:
-        return _client
+    if provider in _clients:
+        return _clients[provider]
+    key = config.api_key_for(provider)
+    if not key:
+        raise SystemExit(
+            f"No API key for provider '{provider}'. Set "
+            f"{provider.upper()}_API_KEY in your .env file.")
     if provider == "anthropic":
         from anthropic import Anthropic
-        config.require("ANTHROPIC_API_KEY")
-        _client = Anthropic(api_key=config.ANTHROPIC_API_KEY)
+        _clients[provider] = Anthropic(api_key=key)
     else:
         from openai import OpenAI
-        config.require("LLM_API_KEY")
-        _client = OpenAI(api_key=config.LLM_API_KEY, base_url=BASE_URLS.get(provider))
-    return _client
+        _clients[provider] = OpenAI(api_key=key, base_url=BASE_URLS.get(provider))
+    return _clients[provider]
 
 
 def _parse_json(text: str) -> dict:
@@ -141,39 +165,63 @@ def cache_report() -> str:
 
 
 def _call_openai_compat(provider, model, system, user, schema, name):
+    """Try strict json_schema first (most reliable), fall back progressively.
+
+    Not every OpenAI-compatible endpoint supports every response_format
+    variant, so this degrades gracefully rather than assuming.
+    """
     client = _client_for(provider)
-    sys_prompt = (
-        f"{system}\n\n"
-        f"Reply with a single JSON object and nothing else — no prose, no code fences.\n"
-        f"It must match this schema exactly:\n{json.dumps(schema)}"
-    )
-    kwargs = dict(
-        model=model,
-        max_tokens=1500,
-        messages=[{"role": "system", "content": sys_prompt},
-                  {"role": "user", "content": user}],
-    )
+    base_messages = [{"role": "system", "content": system},
+                     {"role": "user", "content": user}]
+    kwargs = dict(model=model, max_tokens=1500, messages=base_messages)
+
+    try:
+        resp = client.chat.completions.create(
+            **kwargs, response_format={
+                "type": "json_schema",
+                "json_schema": {"name": name, "schema": schema, "strict": True},
+            })
+        return _parse_json(resp.choices[0].message.content)
+    except Exception:
+        pass  # not every provider supports json_schema — degrade below
+
     try:
         resp = client.chat.completions.create(
             **kwargs, response_format={"type": "json_object"})
+        return _parse_json(resp.choices[0].message.content)
     except Exception:
-        # Some models/providers reject response_format. The prompt still asks for JSON.
-        resp = client.chat.completions.create(**kwargs)
+        pass  # some providers/models reject response_format entirely
+
+    sys_prompt = (
+        f"{system}\n\nReply with a single JSON object and nothing else — "
+        f"no prose, no code fences. It must match this schema:\n{json.dumps(schema)}"
+    )
+    resp = client.chat.completions.create(
+        model=model, max_tokens=1500,
+        messages=[{"role": "system", "content": sys_prompt},
+                  {"role": "user", "content": user}])
     return _parse_json(resp.choices[0].message.content)
 
 
 def structured(system, user: str, schema: dict, name: str = "result",
-               model: str | None = None, cache_system: bool = False) -> dict | None:
+               model: str | None = None, provider: str | None = None,
+               cache_system: bool = False) -> dict:
     """Get a schema-shaped dict back from whichever provider is configured.
 
     system: a string, or a list of strings where the last one is the stable
-    prefix worth caching (pass cache_system=True to enable that).
+    prefix worth caching (pass cache_system=True to enable that; Anthropic only).
+
+    Raises DailyQuotaExceeded or LLMCallFailed on failure — it does NOT return
+    None. A caller that treated a None return as "not applicable" would silently
+    mistake a failed call for a real negative result, which is exactly the bug
+    this replaces.
     """
-    provider = config.LLM_PROVIDER
+    provider = provider or config.LLM_PROVIDER
     model = model or config.MODEL_EXTRACT
+    last_err = None
 
     for attempt in range(config.LLM_MAX_RETRIES):
-        _throttle()
+        _throttle(provider)
         try:
             if provider == "anthropic":
                 return _call_anthropic(model, system, user, schema, name,
@@ -181,16 +229,24 @@ def structured(system, user: str, schema: dict, name: str = "result",
             joined = system if isinstance(system, str) else "\n\n".join(system)
             return _call_openai_compat(provider, model, joined, user, schema, name)
         except Exception as e:
-            msg = str(e).lower()
-            rate_limited = "429" in msg or "rate" in msg or "resource_exhausted" in msg
-            last = attempt == config.LLM_MAX_RETRIES - 1
-            if last:
-                log.error("LLM call failed after %s attempts: %s",
-                          config.LLM_MAX_RETRIES, e)
-                return None
-            wait = (config.LLM_BACKOFF_BASE * (2 ** attempt)
-                    + random.uniform(0, 1)) if rate_limited else 2
-            if rate_limited:
-                log.warning("rate limited, waiting %.0fs (attempt %s)", wait, attempt + 1)
+            last_err = e
+            kind = _classify_error(str(e).lower())
+            if kind == "daily":
+                log.error("daily quota hit on %s (%s) — no point retrying today",
+                          provider, model)
+                raise DailyQuotaExceeded(str(e)) from e
+
+            last_attempt = attempt == config.LLM_MAX_RETRIES - 1
+            if last_attempt:
+                break
+            if kind == "minute":
+                wait = config.LLM_BACKOFF_BASE * (2 ** attempt) + random.uniform(0, 1)
+                log.warning("rate limited on %s, waiting %.0fs (attempt %s)",
+                           provider, wait, attempt + 1)
+            else:
+                wait = 2
             time.sleep(wait)
-    return None
+
+    log.error("LLM call to %s failed after %s attempts: %s",
+              provider, config.LLM_MAX_RETRIES, last_err)
+    raise LLMCallFailed(str(last_err))

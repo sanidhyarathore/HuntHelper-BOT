@@ -130,7 +130,14 @@ def regex_scam(text: str) -> str | None:
 
 
 def extract(text: str, buttons: list) -> dict | None:
-    """Return a structured dict, or None if this isn't a job post."""
+    """Return a structured dict, or None if this genuinely isn't a job post.
+
+    Raises llm.LLMCallFailed / llm.DailyQuotaExceeded on a real API failure —
+    it does NOT swallow those into None. A None here means "the model looked
+    at this and decided it's not a job post," which the pipeline is allowed to
+    mark processed and forget. A raised exception means "we don't know yet,"
+    which the pipeline must NOT mark processed, so it gets retried next run.
+    """
     if not looks_like_job(text):
         return None
 
@@ -141,9 +148,8 @@ def extract(text: str, buttons: list) -> dict | None:
     if btn_desc:
         content += f"\n\nINLINE BUTTONS:\n{btn_desc}"
 
-    data = llm.structured(SYSTEM, content, JOB_SCHEMA, name="emit_job")
-    if not data:
-        return None
+    data = llm.structured(SYSTEM, content, JOB_SCHEMA, name="emit_job",
+                          provider=config.PROVIDER_EXTRACT, model=config.MODEL_EXTRACT)
 
     if not data.get("is_job_post"):
         return None

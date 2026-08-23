@@ -153,11 +153,17 @@ def llm_score(job: dict, prof: dict) -> tuple[int, str]:
     job_only = {k: job.get(k) for k in
                 ("company", "title", "location", "country", "seniority",
                  "function", "min_years", "comp", "key_skills")}
-    data = llm.structured(
-        [SYSTEM, _profile_block(prof)],
-        "JOB TO SCORE:\n" + json.dumps(job_only, ensure_ascii=False),
-        FIT_SCHEMA, name="emit_fit", cache_system=True)
-    if not data:
+    try:
+        data = llm.structured(
+            [SYSTEM, _profile_block(prof)],
+            "JOB TO SCORE:\n" + json.dumps(job_only, ensure_ascii=False),
+            FIT_SCHEMA, name="emit_fit",
+            provider=config.PROVIDER_SCORE, model=config.MODEL_SCORE,
+            cache_system=(config.PROVIDER_SCORE == "anthropic"))
+    except llm.DailyQuotaExceeded:
+        raise  # the run must stop, not silently score everything else 50
+    except llm.LLMCallFailed as e:
+        log.warning("scoring failed, will mark for manual review: %s", e)
         return 50, "scoring unavailable — review manually"
     try:
         return max(0, min(100, int(data["score"]))), str(data.get("reason", ""))

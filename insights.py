@@ -212,7 +212,12 @@ def market(c):
 
 
 def cache(_c=None):
-    """Will prompt caching actually engage? Free to check, silent if it won't."""
+    """Will prompt caching actually engage? Free to check, silent if it won't.
+
+    Only Anthropic supports prompt caching in this project. Other providers
+    (Gemini, Groq, etc.) send the full profile on every call regardless —
+    which is fine on a free tier since there's no per-token bill to reduce.
+    """
     head("PROMPT CACHE READINESS")
     try:
         sys.path.insert(0, str(Path(__file__).parent))
@@ -221,6 +226,13 @@ def cache(_c=None):
         block = sc._profile_block(cfg.profile())
     except Exception as e:
         return print(f"  Could not load profile: {e}")
+
+    provider = getattr(cfg, "PROVIDER_SCORE", getattr(cfg, "LLM_PROVIDER", "anthropic"))
+    if provider != "anthropic":
+        print(f"  Scoring provider is '{provider}' — prompt caching is an")
+        print(f"  Anthropic-only feature in this project, so it doesn't apply.")
+        print(f"  Nothing to fix here; this check only matters if PROVIDER_SCORE=anthropic.")
+        return
 
     tokens = len(block) // 3
     floor = getattr(cfg, "CACHE_MIN_TOKENS", 4096)

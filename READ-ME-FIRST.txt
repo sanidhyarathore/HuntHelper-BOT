@@ -1,26 +1,71 @@
-PATCH 2 — cost reduction. Copy all .py files into your tgjobs folder.
+PATCH 3 — switch to Gemini (free tier) + two reliability fixes.
 
-Your .env, profile.yaml and data\jobs.db are NOT in this zip.
-The database upgrades itself automatically on next run.
+Copy all .py files into your tgjobs folder, overwrite when asked.
+Your .env, profile.yaml and data\jobs.db are NOT touched by copying these.
 
-FIRST, run this (free, instant):
-  .venv\Scripts\python insights.py cache
+===========================================================
+STEP 1 — edit .env yourself, add these lines
+===========================================================
 
-It tells you whether prompt caching will actually engage. If it says
-TOO SMALL, caching is silently ignored and you pay full price — add
-more detail to profile.yaml until it clears.
+GEMINI_API_KEY=paste_your_key_here
 
-WHAT CHANGED
-  Repost skip     Identical postings across channels are now detected
-                  by content fingerprint BEFORE any API call.
-  Negative filter Obvious engineering titles skipped without paying to
-                  read them. Multi-role digests are never dropped.
-  Prompt caching  Your profile moved into a cached system block. After
-                  the first call of a run it bills at roughly 10%.
+PROVIDER_EXTRACT=gemini
+PROVIDER_SCORE=gemini
+PROVIDER_WRITE=gemini
 
-WHAT I DID NOT BUILD
-  Merging extract+score into one call. It would remove the free,
-  auditable hard-filter step between them, and once caching is on it
-  saves very little. Quality cost was not worth it.
+MODEL_EXTRACT=gemini-3.1-flash-lite
+MODEL_SCORE=gemini-3.1-flash-lite
+MODEL_WRITE=gemini-3.1-flash-lite
 
-Each run now prints  repost / prefiltered / api_calls_saved  counts.
+Leave ANTHROPIC_API_KEY where it is — harmless to keep, just unused now.
+Do NOT set the old LLM_PROVIDER= line; if it's still in your .env from
+before, delete that line (it would override the three PROVIDER_ lines above).
+
+===========================================================
+STEP 2 — two bugs fixed, found while wiring this up
+===========================================================
+
+1. llm.py had a crash-on-first-call bug (_throttle() was being called with
+   no arguments when the function required one). Every API call would have
+   failed immediately. Fixed.
+
+2. pipeline.py marked every message "processed" even when the API call
+   failed — so a failure meant the job was silently gone forever, no retry,
+   no error you'd see. This mattered little on Claude but WOULD have bitten
+   hard the first time you brushed the Gemini daily cap. Fixed: a failed
+   message now stays unprocessed and is retried automatically next run.
+
+3. Added quota-awareness: a genuine DAILY cap hit now stops the run
+   cleanly and immediately (no wasted retries), leaving every remaining
+   message untouched for next time. You'll see this in the log as:
+     "Daily API quota reached. Stopping this run..."
+   That is expected behaviour, not an error to worry about.
+
+===========================================================
+WHAT ELSE CHANGED
+===========================================================
+
+- gemini-3.1-flash-lite specifically: this is the model with the 500/day
+  free quota. Every other current Gemini Flash variant (3, 3.5, 3.6, 3.7)
+  is capped at just 20/day on the free tier — fine to test with, useless
+  for daily automation. Confirmed against your own AI Studio account.
+- Structured output now tries the strictest format first (json_schema),
+  falling back progressively if a provider doesn't support it — more
+  reliable extraction than plain prompted JSON.
+- insights.py cache command now recognises you're not on Anthropic and
+  says so plainly, instead of running a check that no longer applies.
+
+===========================================================
+AFTER COPYING
+===========================================================
+
+Run:
+  .venv\Scripts\python run.py stats
+
+Then a normal cycle:
+  runme.bat
+
+Watch the log for "quota_stopped" in the printed counts — if you see it,
+that's the 500/day cap doing its job, not a failure. Just run again
+tomorrow (or later, once IST midnight/UTC rollover has passed) and it
+picks up exactly where it left off.

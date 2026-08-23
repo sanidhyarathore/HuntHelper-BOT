@@ -4,13 +4,14 @@ Deliberately stops at DRAFT. Nothing is ever sent without you pressing send in
 Gmail. Cheap insurance against a bad parse emailing your CV to a stranger.
 """
 import base64
+import json
 import logging
 import mimetypes
 import os.path
 from email.message import EmailMessage
 
 import config
-import extract
+import llm
 
 log = logging.getLogger("drafts")
 
@@ -55,20 +56,16 @@ def tailored_note(job, prof) -> dict:
                 if k in job.keys()},
     }
     try:
-        resp = extract.anthropic().messages.create(
-            model=config.MODEL_WRITE,
-            max_tokens=1024,
-            system=NOTE_SYSTEM,
-            tools=[{"name": "emit_note", "description": "Emit the email.",
-                    "input_schema": NOTE_SCHEMA}],
-            tool_choice={"type": "tool", "name": "emit_note"},
-            messages=[{"role": "user", "content": str(payload)}],
-        )
-        for b in resp.content:
-            if b.type == "tool_use":
-                return dict(b.input)
-    except Exception:
-        log.exception("note generation failed")
+        data = llm.structured(NOTE_SYSTEM, json.dumps(payload, ensure_ascii=False, default=str),
+                              NOTE_SCHEMA, name="emit_note",
+                              provider=config.PROVIDER_WRITE, model=config.MODEL_WRITE)
+    except llm.LLMCallFailed as e:
+        log.warning("note generation failed: %s", e)
+        data = None
+    if data and data.get("body"):
+        return {"subject": data.get("subject") or
+                f"Application: {job['title']} — {prof.get('name','')}",
+                "body": data["body"]}
     return {
         "subject": f"Application: {job['title']} — {prof.get('name','')}",
         "body": "(note generation failed — write manually)",

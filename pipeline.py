@@ -6,6 +6,7 @@ import config
 import db
 import dedupe
 import extract
+import llm
 import score
 
 log = logging.getLogger("pipeline")
@@ -14,36 +15,61 @@ log = logging.getLogger("pipeline")
 def process(limit=200) -> dict:
     prof = config.profile()
     counts = {"seen": 0, "not_job": 0, "repost": 0, "prefiltered": 0,
-              "dupe": 0, "rejected": 0, "kept": 0, "scam": 0, "api_calls_saved": 0}
+              "dupe": 0, "rejected": 0, "kept": 0, "scam": 0,
+              "api_calls_saved": 0, "failed_will_retry": 0, "quota_stopped": False}
 
     for msg in db.unprocessed_messages(limit):
         counts["seen"] += 1
-        try:
-            text = msg["text"] or ""
+        text = msg["text"] or ""
 
-            # --- free skip 1: we have already analysed this exact posting ---
-            chash = extract.content_hash(text)
-            if chash:
-                db.set_content_hash(msg["id"], chash)
-                if db.seen_content(chash, msg["id"]):
-                    counts["repost"] += 1
-                    counts["api_calls_saved"] += 1
-                    continue
-
-            # --- free skip 2: a title we would reject after paying to read ---
-            if extract.looks_like_job(text):
-                reason = extract.negative_prefilter(text)
-                if reason:
-                    counts["prefiltered"] += 1
-                    counts["api_calls_saved"] += 1
-                    continue
-
-            buttons = json.loads(msg["buttons"] or "[]")
-            data = extract.extract(text, buttons)
-            if not data:
-                counts["not_job"] += 1
+        # --- free skip 1: we have already analysed this exact posting ---
+        chash = extract.content_hash(text)
+        if chash:
+            db.set_content_hash(msg["id"], chash)
+            if db.seen_content(chash, msg["id"]):
+                counts["repost"] += 1
+                counts["api_calls_saved"] += 1
+                db.mark_processed(msg["id"])
                 continue
 
+        # --- free skip 2: a title we would reject after paying to read ---
+        if extract.looks_like_job(text):
+            reason = extract.negative_prefilter(text)
+            if reason:
+                counts["prefiltered"] += 1
+                counts["api_calls_saved"] += 1
+                db.mark_processed(msg["id"])
+                continue
+
+        # --- the actual API calls. A message only gets marked processed once
+        # we KNOW the outcome — a failure here must leave it alone so the next
+        # run retries it, rather than silently discarding it forever. ---
+        try:
+            buttons = json.loads(msg["buttons"] or "[]")
+            data = extract.extract(text, buttons)
+        except llm.DailyQuotaExceeded:
+            log.warning("Daily API quota reached. Stopping this run — "
+                       "remaining messages are untouched and will run next time.")
+            counts["quota_stopped"] = True
+            break
+        except llm.LLMCallFailed as e:
+            log.warning("extraction failed for message %s (will retry next run): %s",
+                       msg["id"], e)
+            counts["failed_will_retry"] += 1
+            continue
+        except Exception:
+            # A genuine bug (bad JSON in stored buttons, etc), not an API failure.
+            # Retrying won't help, so mark it processed rather than getting stuck.
+            log.exception("unexpected error processing message %s — skipping it", msg["id"])
+            db.mark_processed(msg["id"])
+            continue
+
+        if not data:
+            counts["not_job"] += 1
+            db.mark_processed(msg["id"])
+            continue
+
+        try:
             key = dedupe.dedupe_key(
                 data["company"], data["title"], data["location"], data["apply_url"])
 
@@ -79,9 +105,14 @@ def process(limit=200) -> dict:
                 counts["rejected"] += 1
             else:
                 counts["kept"] += 1
+            db.mark_processed(msg["id"])
+        except llm.DailyQuotaExceeded:
+            log.warning("Daily API quota reached during scoring. Stopping this run — "
+                       "this message is untouched and will run next time.")
+            counts["quota_stopped"] = True
+            break
         except Exception:
-            log.exception("failed on message %s", msg["id"])
-        finally:
+            log.exception("failed scoring/saving message %s", msg["id"])
             db.mark_processed(msg["id"])
 
     return counts

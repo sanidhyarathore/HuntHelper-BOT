@@ -21,28 +21,74 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 BOT_SESSION = str(ROOT / "data" / "bot.session")
 MY_USER_ID = int(os.getenv("MY_USER_ID", "0"))  # your own numeric Telegram id
 
-# ---- LLM provider ----
-# anthropic (default). Swap to gemini/groq for a free tier if you ever want to;
-# see README. Only LLM_PROVIDER, LLM_API_KEY and the models need to change.
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "anthropic").lower()
+# ---- LLM providers, per call type ----
+# Extraction is high-volume, mechanical, and sees only public job adverts —
+# a free tier is a good fit. Scoring carries your profile.yaml (which contains
+# confidential employer metrics) and needs real judgement, so it defaults to
+# Claude. Set them the same if you want one provider for everything.
+PROVIDER_EXTRACT = os.getenv("PROVIDER_EXTRACT", "anthropic").lower()
+PROVIDER_SCORE = os.getenv("PROVIDER_SCORE", "anthropic").lower()
+PROVIDER_WRITE = os.getenv("PROVIDER_WRITE", "anthropic").lower()
+
+# Back-compat: LLM_PROVIDER sets all three at once if the specific ones are unset.
+_legacy = os.getenv("LLM_PROVIDER", "").lower()
+if _legacy:
+    PROVIDER_EXTRACT = os.getenv("PROVIDER_EXTRACT", _legacy).lower()
+    PROVIDER_SCORE = os.getenv("PROVIDER_SCORE", _legacy).lower()
+    PROVIDER_WRITE = os.getenv("PROVIDER_WRITE", _legacy).lower()
+LLM_PROVIDER = PROVIDER_SCORE  # for anything still reading the old name
+
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
-LLM_API_KEY = os.getenv("LLM_API_KEY", "") or ANTHROPIC_API_KEY
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+
+
+def api_key_for(provider: str) -> str:
+    return {
+        "anthropic": ANTHROPIC_API_KEY,
+        "gemini": GEMINI_API_KEY,
+        "groq": GROQ_API_KEY,
+        "openai": OPENAI_API_KEY,
+        "openrouter": OPENROUTER_API_KEY,
+    }.get(provider, "") or LLM_API_KEY
+
 
 _DEFAULT_MODELS = {
     "anthropic":  ("claude-haiku-4-5-20251001", "claude-sonnet-5"),
-    "gemini":     ("gemini-2.5-flash-lite", "gemini-2.5-flash"),
+    # gemini-3.1-flash-lite: confirmed 500 requests/day free tier (checked in
+    # AI Studio Aug 2026). Every other current Flash variant (3, 3.5, 3.6, 3.7)
+    # is capped at just 20/day on the free tier — fine for testing, not for a
+    # daily automated run. Don't "upgrade" this default without re-checking
+    # https://aistudio.google.com/usage first.
+    "gemini":     ("gemini-3.1-flash-lite", "gemini-3.1-flash-lite"),
     "groq":       ("llama-3.3-70b-versatile", "llama-3.3-70b-versatile"),
     "openai":     ("gpt-4.1-mini", "gpt-4.1"),
     "openrouter": ("google/gemini-2.5-flash-lite", "google/gemini-2.5-flash"),
 }
-_d = _DEFAULT_MODELS.get(LLM_PROVIDER, _DEFAULT_MODELS["anthropic"])
-MODEL_EXTRACT = os.getenv("MODEL_EXTRACT", "") or _d[0]   # cheap, high volume
-MODEL_WRITE = os.getenv("MODEL_WRITE", "") or _d[1]       # tailored notes
 
-# Seconds between API calls. A paid Anthropic key needs almost no spacing;
-# free tiers elsewhere cap around 15/minute, hence the 4s fallback.
-_default_interval = "0.4" if LLM_PROVIDER == "anthropic" else "4"
-LLM_MIN_INTERVAL = float(os.getenv("LLM_MIN_INTERVAL", _default_interval))
+MODEL_EXTRACT = (os.getenv("MODEL_EXTRACT", "")
+                 or _DEFAULT_MODELS.get(PROVIDER_EXTRACT, _DEFAULT_MODELS["anthropic"])[0])
+MODEL_SCORE = (os.getenv("MODEL_SCORE", "")
+               or _DEFAULT_MODELS.get(PROVIDER_SCORE, _DEFAULT_MODELS["anthropic"])[0])
+MODEL_WRITE = (os.getenv("MODEL_WRITE", "")
+               or _DEFAULT_MODELS.get(PROVIDER_WRITE, _DEFAULT_MODELS["anthropic"])[1])
+
+# Seconds between calls, per provider. Free tiers cap around 15/minute.
+_INTERVALS = {"anthropic": 0.4, "gemini": 4.5, "groq": 2.5,
+              "openai": 0.5, "openrouter": 1.0}
+
+
+def min_interval(provider: str) -> float:
+    override = os.getenv("LLM_MIN_INTERVAL", "")
+    if override:
+        return float(override)
+    return _INTERVALS.get(provider, 4.0)
+
+
+LLM_MIN_INTERVAL = min_interval(PROVIDER_SCORE)  # legacy readers
 LLM_MAX_RETRIES = int(os.getenv("LLM_MAX_RETRIES", "5"))
 LLM_BACKOFF_BASE = float(os.getenv("LLM_BACKOFF_BASE", "8"))
 
