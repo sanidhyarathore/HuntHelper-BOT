@@ -40,16 +40,47 @@ class DailyQuotaExceeded(LLMCallFailed):
     stop the current run rather than keep retrying this or later messages."""
 
 
-def _classify_error(msg_lower: str) -> str | None:
-    """'daily', 'minute', or None (not a rate-limit error at all)."""
-    is_rate = ("429" in msg_lower or "resource_exhausted" in msg_lower
-               or "rate limit" in msg_lower or "ratelimiterror" in msg_lower
-               or "quota" in msg_lower)
+def _error_text(e: Exception) -> str:
+    """Pull the richest text available from an exception for classification.
+
+    Gemini's top-level error MESSAGE is generic ("you exceeded your quota...")
+    regardless of whether it's a per-minute or per-day limit — it never
+    actually contains the words "day" or "daily". The real signal is a
+    quotaId string (e.g. GenerateRequestsPerDayPerProjectPerModel-FreeTier)
+    nested inside the error body, which SDKs often expose via .body or
+    .response rather than in str(e) itself. Check every place it might be.
+    """
+    parts = [str(e)]
+    body = getattr(e, "body", None)
+    if body:
+        parts.append(str(body))
+    resp = getattr(e, "response", None)
+    if resp is not None:
+        for attr in ("json", "text"):
+            try:
+                val = getattr(resp, attr)
+                parts.append(str(val() if callable(val) else val))
+                break
+            except Exception:
+                continue
+    return " ".join(parts).lower()
+
+
+def _classify_error(text_lower: str) -> str | None:
+    """'daily', 'minute', 'unknown' (rate-limited but shape not recognised),
+    or None (not a rate/quota error at all)."""
+    is_rate = ("429" in text_lower or "resource_exhausted" in text_lower
+               or "rate limit" in text_lower or "ratelimiterror" in text_lower
+               or "quota" in text_lower)
     if not is_rate:
         return None
-    if re.search(r"\bper[\s_-]?day\b|\bdaily\b|\brpd\b", msg_lower):
+    # These are the real quotaId fragments Gemini returns (confirmed against
+    # live error bodies) — not the prose in the message field.
+    if re.search(r"per[\s_-]?day", text_lower):
         return "daily"
-    return "minute"
+    if re.search(r"per[\s_-]?(minute|second)", text_lower):
+        return "minute"
+    return "unknown"
 
 
 def _throttle(provider):
@@ -72,10 +103,16 @@ def _client_for(provider):
             f"{provider.upper()}_API_KEY in your .env file.")
     if provider == "anthropic":
         from anthropic import Anthropic
-        _clients[provider] = Anthropic(api_key=key)
+        _clients[provider] = Anthropic(api_key=key, max_retries=0)
     else:
         from openai import OpenAI
-        _clients[provider] = OpenAI(api_key=key, base_url=BASE_URLS.get(provider))
+        # max_retries=0: the SDK retries 429s internally by default, invisible
+        # to our _throttle() spacing. That means a single "call" from our side
+        # can silently fire 2-3 rapid requests, bursting past a per-minute cap
+        # even when our own pacing looks correct. Our retry loop in structured()
+        # is the only one that should run.
+        _clients[provider] = OpenAI(api_key=key, base_url=BASE_URLS.get(provider),
+                                    max_retries=0)
     return _clients[provider]
 
 
@@ -230,7 +267,7 @@ def structured(system, user: str, schema: dict, name: str = "result",
             return _call_openai_compat(provider, model, joined, user, schema, name)
         except Exception as e:
             last_err = e
-            kind = _classify_error(str(e).lower())
+            kind = _classify_error(_error_text(e))
             if kind == "daily":
                 log.error("daily quota hit on %s (%s) — no point retrying today",
                           provider, model)

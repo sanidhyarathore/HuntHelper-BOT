@@ -35,6 +35,12 @@ logging.basicConfig(
 )
 log = logging.getLogger("run")
 
+# These log every HTTP call and every internal SDK retry at INFO level, which
+# buries our own warnings (rate limits, quota, failed messages) in noise.
+# WARNING still shows anything that actually matters.
+for _noisy in ("httpx", "httpx2", "httpcore", "openai", "openai._base_client"):
+    logging.getLogger(_noisy).setLevel(logging.WARNING)
+
 PROCESS_EVERY = 15 * 60   # seconds
 FOLLOWUP_EVERY = 6 * 3600
 

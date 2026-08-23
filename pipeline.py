@@ -18,6 +18,15 @@ def process(limit=200) -> dict:
               "dupe": 0, "rejected": 0, "kept": 0, "scam": 0,
               "api_calls_saved": 0, "failed_will_retry": 0, "quota_stopped": False}
 
+    # Belt and braces alongside DailyQuotaExceeded: if Google ever changes
+    # their error format again (they have, more than once), our string-based
+    # classifier could miss it. Several straight failures for ANY reason is
+    # itself strong evidence of a persistent problem, not bad luck on
+    # individual messages — so stop instead of grinding a 500-message
+    # backlog through pointless retries one at a time.
+    consecutive_failures = 0
+    CIRCUIT_BREAKER_LIMIT = 4
+
     for msg in db.unprocessed_messages(limit):
         counts["seen"] += 1
         text = msg["text"] or ""
@@ -47,15 +56,25 @@ def process(limit=200) -> dict:
         try:
             buttons = json.loads(msg["buttons"] or "[]")
             data = extract.extract(text, buttons)
+            consecutive_failures = 0
         except llm.DailyQuotaExceeded:
             log.warning("Daily API quota reached. Stopping this run — "
                        "remaining messages are untouched and will run next time.")
             counts["quota_stopped"] = True
             break
         except llm.LLMCallFailed as e:
+            counts["failed_will_retry"] += 1
+            consecutive_failures += 1
+            if consecutive_failures >= CIRCUIT_BREAKER_LIMIT:
+                log.warning(
+                    "%s calls in a row have failed — treating this as a stuck "
+                    "quota/outage rather than bad luck. Stopping this run; "
+                    "remaining messages are untouched and will run next time. "
+                    "Last error: %s", consecutive_failures, e)
+                counts["quota_stopped"] = True
+                break
             log.warning("extraction failed for message %s (will retry next run): %s",
                        msg["id"], e)
-            counts["failed_will_retry"] += 1
             continue
         except Exception:
             # A genuine bug (bad JSON in stored buttons, etc), not an API failure.

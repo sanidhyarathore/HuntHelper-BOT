@@ -77,7 +77,7 @@ MODEL_WRITE = (os.getenv("MODEL_WRITE", "")
                or _DEFAULT_MODELS.get(PROVIDER_WRITE, _DEFAULT_MODELS["anthropic"])[1])
 
 # Seconds between calls, per provider. Free tiers cap around 15/minute.
-_INTERVALS = {"anthropic": 0.4, "gemini": 4.5, "groq": 2.5,
+_INTERVALS = {"anthropic": 0.4, "gemini": 5.0, "groq": 2.5,
               "openai": 0.5, "openrouter": 1.0}
 
 
